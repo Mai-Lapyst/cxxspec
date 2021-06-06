@@ -1,0 +1,6 @@
+# exclude build stuff
+.xmake
+build
+
+# exclude some other stuff
+*.run
