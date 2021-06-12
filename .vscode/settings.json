@@ -56,6 +56,12 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "iostream": "cpp",
-        "ios": "cpp"
+        "ios": "cpp",
+        "cassert": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp",
+        "map": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp"
     }
 }

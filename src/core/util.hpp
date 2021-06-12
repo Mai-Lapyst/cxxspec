@@ -3,29 +3,15 @@
 #include <string>
 #include <ostream>
 #include <functional>
-
-#if defined(__GNUG__) || defined(__clang__)
-    #include <cxxabi.h>
-    #include <memory>
-#else
-    #warning "Platform not fully supported; missing symbol demangling support!"
-#endif
+#include <type_traits>
 
 namespace cxxspec {
     namespace util {
 
-        #if defined(__GNUG__) || defined(__clang__)
-            std::string demangle(const char* mangledName) {
-                int status;
-                std::unique_ptr<char[], void (*)(void *)> result{
-                    abi::__cxa_demangle(mangledName, NULL, NULL, &status), std::free};
-                return (status == 0) ? result.get() : mangledName;
-            }
-        #else
-            std::string demangle(const char* mangledName) {
-                return mangledName;
-            }
-        #endif
+        std::string demangle(const char* mangledName);
+
+        template<typename T>
+        const T& unmove(T&& param) { return param; }
 
         namespace is_streamable_imp {
 
@@ -36,19 +22,11 @@ namespace cxxspec {
                 std::ostream &
             >;
 
-            // check for an operator<< via SFINAE (const)
-            template <class C>
-            auto test(int) -> std::is_same<
-                decltype(operator<<(std::declval<std::ostream&>(),
-                                    std::declval<C const &>())),
-                std::ostream&
-            >;
-
             // check for an operator<< via SFINAE
             template <class C>
             auto test(int) -> std::is_same<
                 decltype(operator<<(std::declval<std::ostream&>(),
-                                    std::declval<C&>())),
+                                    std::declval<const C&>())),
                 std::ostream&
             >;
 
@@ -60,6 +38,81 @@ namespace cxxspec {
 
         template <class T>
         struct is_streamable : public decltype( is_streamable_imp::test<T>(0) ) {};
+
+        namespace is_iterateable_impl {
+            template <class C>
+            auto test(void *) -> decltype(
+                std::declval<C>().begin(),
+                std::declval<C>().end(),
+                std::true_type{}
+            );
+
+            template <class C>
+            auto test(int) -> decltype(
+                std::declval<C>().cbegin(),
+                std::declval<C>().cend(),
+                std::true_type{}
+            );
+
+            template <class>
+            auto test(...) -> std::false_type;
+        }
+
+        template <class T>
+        struct is_iterateable : public decltype( is_iterateable_impl::test<T>(0) ) {};
+
+        template<class T>
+        struct is_c_str
+        : std::integral_constant<
+            bool,
+            std::is_same<char const *, typename std::decay<T>::type>::value ||
+            std::is_same<char *, typename std::decay<T>::type>::value
+        > {};
+
+        template<typename...>
+            struct voider { using type = void; };
+
+        template<typename... T>
+            using void_t = typename voider<T...>::type;
+
+        namespace mappish_impl {
+            template<typename T, typename U = void>
+                struct is_mappish_impl : public std::false_type { };
+            
+            template<typename T>
+                struct is_mappish_impl<T, void_t<typename T::key_type,
+                                                typename T::mapped_type,
+                                                decltype(std::declval<T&>()[std::declval<const typename T::key_type&>()])>>
+                : public std::true_type { };
+        }
+
+        template<class T>
+        struct is_mappish : public mappish_impl::is_mappish_impl<T>::type { };
+
+        namespace pairish_impl {
+            template<typename T, typename U = void>
+                struct is_pairish_impl : std::false_type { };
+
+            template<typename T>
+                struct is_pairish_impl<T, void_t<typename T::first_type,
+                                                typename T::second_type>>
+                : std::true_type { };
+        }
+
+        template<class T>
+        struct is_pairish : pairish_impl::is_pairish_impl<T>::type { };
+
+        template<class T>
+        struct is_bounded_array: std::false_type {};
+        
+        template<class T, std::size_t N>
+        struct is_bounded_array<T[N]> : std::true_type {};
+
+        template<class T>
+        struct get_array_bound : std::integral_constant<std::size_t, 0> {};
+
+        template<class T, std::size_t N>
+        struct get_array_bound<T[N]> : std::integral_constant<std::size_t, N> {};
 
     }
 }

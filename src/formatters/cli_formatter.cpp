@@ -44,17 +44,21 @@ namespace cxxspec {
 
         if (result) {
             i();
-            stream << "\e[32m";
+            if (this->useColors())
+                stream << "\e[32m";
             stream << example.name() << "\n";
         }
         else {
-            stream << "\e[31m";
-            i(); stream << example.name() << "\n";
+            i();
+            if (this->useColors())
+                stream << "\e[31m";
+            stream << example.name() << "\n";
             chi(1);
                 i(); stream << reason << "\n";
             chi(-1);
         }
-        stream << "\e[0m";
+        if (this->useColors())
+            stream << "\e[0m";
     }
     void CliFormatter::onLeaveExample(Example& example) {}
 

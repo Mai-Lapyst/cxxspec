@@ -11,6 +11,8 @@ namespace cxxspec {
 
     class Formatter {
     public:
+        virtual ~Formatter() {}
+
         // called when the testing starts (before first spec)
         virtual void onBeginTesting() = 0;
 

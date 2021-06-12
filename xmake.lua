@@ -3,6 +3,9 @@ add_rules("mode.release")
 
 set_toolchains("clang")
 
+--set_languages("c++14")
+--set_languages("c++17")
+
 target("cxxspec")
     set_kind("shared")
     add_files("src/*.cpp", "src/**/*.cpp")

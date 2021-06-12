@@ -2,6 +2,10 @@
 
 cxxspec is an BDD/TDD framework that's like ruby's [rspec](https://rspec.info/), and heavily inspired by it.
 
+compatible with:
+- `c++14`
+- `c++17`
+
 ## License
 
 This project is licensed under the terms of the AGPL v3.0 .
@@ -10,9 +14,8 @@ For license details please see the file `LICENSE`.
 ## Todo / Roadmap
 
 - implement more builtin matchers
-    - for array/vector -like types
-    - for map -like types
-    - for exception catching
+    - support contains_all, contains_any and contains_none
+    - has_key & has_value
     - ...
 - enhance the system that allows us to access protected members of other classes (`ALLOW_SPEC`)
 - implement `before`, `after` and `around` hooks
@@ -22,9 +25,7 @@ For license details please see the file `LICENSE`.
     - yaml
     - ...
 - default parsing of cli options
-    - would allow one shot's
-    - would allow specifing formatter to output
-    - would allow specifing formatter options
+    - allow specifing more formatter options
 - execution
     - honor more the order of definition (we currently first run all sub-groups and then the examples of a group)
     - allow 'random' execution of examples (with seed)
@@ -48,18 +49,9 @@ To uninstall cxxspec from your system, run `xmake uninstall`.
 To begin writing specs we need a tiny bit of boilerplate code, but this needs only be written once (in your main spec file):
 ```c++
 #include "cxxsepc/cxxspec.hpp"              // includes the core classes and DSL (macros) of cxxspec
-#include "cxxspec/matchers/matchers.hpp"    // includes all builtin matchers like 'eq', 'be'...
 
-// includes the default cli formatter, suitable for output in an terminal
-//  for more formatters, see below
-#include "cxxspec/formatters/cli_formatter.hpp"
-
-#include <iostream>     // for std::cout
-
-int main() {
-    using namespace cxxspec;
-    CliFormatter formatter(std::cout);      // creates an instance of our formatter to operate on std::out
-    runAllSpecs(formatter);                 // run all defined specs with our formatter
+int main(int argc, char** argv) {
+    cxxspec::runSpecs(--argc, ++argv);      // this runs your specs with the builtin commandline parser & options
 }
 ```
 
@@ -68,8 +60,6 @@ int main() {
 First the code:
 ```c++
 #include <cxxspec/cxxspec.hpp>
-#include <cxxspec/matchers/matchers.hpp>
-#include <cxxspec/formatters/cli_formatter.hpp>
 #include <iostream>
 
 // ----- this is our project's code -----
@@ -80,20 +70,19 @@ namespace mytest {
 
 namespace mytest {
     namespace specs {
-        using cxxspec::matchers::eq;        // <1>
 
-        describe(mytest, $ {                // <2>
-            explain("my_static_var", $ {    // <3>
-                it("should equal 42", _ {   // <4>
-                    expect(mytest::my_static_var).to(eq(42));
+        describe(mytest, $ {                // <1>
+            explain("my_static_var", $ {    // <2>
+                it("should equal 42", _ {   // <3>
+                    expect(mytest::my_static_var).to_eq(42);    // <4>
                 });
 
                 it("should not equal 12", _ {
-                    expect(mytest::my_static_var).to_not(eq(12));
+                    expect(mytest::my_static_var).to_not_eq(12);
                 });
 
                 it("should equal 12", _ {
-                    expect(mytest::my_static_var).to(eq(12));
+                    expect(mytest::my_static_var).to_eq(12);
                 });
             });
         });
@@ -101,24 +90,18 @@ namespace mytest {
     }
 }
 
-int main() {
-    using namespace cxxspec;
-    CliFormatter formatter(std::cout);
-    runAllSpecs(formatter);
+int main(int argc, char** argv) {
+    cxxspec::runSpecs(--argc, ++argv);
 }
 ```
 
 To build & run this example, install cxxspec and then go into the `examples` folder and run: `xmake -P . -r && xmake run -P . simple`.
 
-In order to use matchers (thats are the things that determine if somthing is ok or not), we need to import them.
-You can to that by using for example `using cxxspec::matchers::eq;` to import only the `eq` matcher (see `<1>`),
-or you could alternatively use `using namespace cxx::matchers;` to import all builtin matchers.
-
-With `describe` you start an new specification (see `<2>`); note that the first argument (`mytest`) is the name of the
+With `describe` you start an new specification (see `<1>`); note that the first argument (`mytest`) is the name of the
 spec and must not be a string or contain spaces, because it's used internaly to create a new function calles `__initSpec_mytest`.
-For an answer why, see below: 'Private and protected class members'.
+For an answer why, see [Private and protected class members](#private-and-protected-class-members).
 
-To group examples inside an spec, you can use `explain` or `context` (see `<3>`); this can be viewed as an example group.
+To group examples inside an spec, you can use `explain` or `context` (see `<2>`); this can be viewed as an example group.
 Note that you can use them also inside each other to go arbitarily deep.
 
 To define an example, you simply use `it`. The first param here is the name of the example.
@@ -127,21 +110,18 @@ Inside it you can declare 'expectations'.
 An expectation always starts with a call to `expect(...)`. As it's argument to give it the value that you 'got'; the value
 that should be checked against.
 
-To now define what is allowed and not you call `to(...)` or `not_to(...)` (`to_not(...)` also works) on the result of `expect`.
-The both variants with the `not` in their name negate the matcher; their first parmeter.
-This means: if your matcher returns 'ok' when you used `to` then all is fine and only a 'not ok' will cause the example to fail.
-With `not_to` and `to_not` this is reversed: 'ok' will cause an fail while with 'not ok' all is fine.
+To now define what is allowed and not you call `to_*` or `to_not_*` methods on the result of `expect`.
+There are a bunch of them; see [Builtin matchers](#builtin-matchers)
 
-Matchers are the actual peace that decide if an example fails or not. For an list of builtin matchers see below.
-For simplicity's sake we just use `eq` here:
+You use them like so: `expect(value_got).to_eq(expected_value);`.
+For example: `expect(mytest::my_static_var).to_eq(42);` (see `<3>`) declares an expectation, that `mytest::my_static_var` equals `42`.
+If this is the case the expectation succeeds and your example continues; however if it is not the case, the whole example will fail immediately.
 
-`eq` will compare the value 'got' (parameter of `expect`) with an expected value (parameter of `eq`).
-It compares by using the compare operator `==` (which can be overloaded in c++) to decide if both values are equal or not.
-If they are indeed equal then it returns a 'ok' state; else it returns a 'not ok' state.
-
-If you then use it with `to` and `not_to`, you can create this:
-- `to(eq(12))`: fails only when the value is not equal with `12`
-- `not_to(eq(12))`: fails only when the value is equal with `12`
+If you wish a negative expectation, you can use the `to_not_*` methods. For our example above this would be `to_not_eq`.
+They are like their `to_*` counterpart but they fail if the check succeeds and succeed when the check fails.
+For Example: `expect(mytest::my_static_var).to_not_eq(100);` declares an expectation, that `mytest::my_static_var` does not equals `100`.
+If this is the case (the equal check fails) then the expectation succeeds; if not (the equal check succeeds) then the expectation fails, and with
+it the whole example.
 
 ### Private and protected class members
 
@@ -166,15 +146,67 @@ namespace mytest {
 }
 ```
 
+### Exceptions
+
+In order to deal with code that can throw exceptions, you need to use `expect_throw` or `expect_no_throw`.
+
+`expect_throw(type, block)` is used to express that the lambda `block` is expected to throw an exception of type `type`.
+Example:
+```c++
+expect_throw(std::runtime_error, [] {
+    throw std::runtime_error("some reason to be thrown");
+});
+```
+If an exception of the given type is catched, then the example continues. However, if nonthing is catched or something other than the given type is catched then
+the example will fail.
+
+`expect_no_throw(block)` is used to express that the lamda `block` is expected to throw nothing. If it does, this means an failure of the example.
+
 ### Builtin matchers
 
-- `be(...)`: Compares by comparing the address of both values (trys to detect if 'exactly the same')
-- `eq(...)`: Compares by using the `==` operator
-- `neq(...)`: Compares by using the `!=` operator
-- `lt(...)`: Compares by using the `<` operator
-- `gt(...)`: Compares by using the `>` operator
-- `le(...)`: Compares by using the `<=` operator
-- `ge(...)`: Compares by using the `>=` operator
+Note: `bound arrays` are all arrays that have a fixed size at compile time; for example : `int my_array[] = {1,2,3,4}`,
+        which is of type `int[4]` and 'bound' to four elements. `unbound arrays` are the opposite: their length is not determineable at compile time,
+        such as `int* my_array = new int[len];`.
+
+`to_eq(...)` compares bot values on equality, this means:
+- for `T[]` that the number of elements and the content must equal. Only bounded arrays work correctly. For unbounded arrays, this compares addresses.
+- for `char*` that the string is equal, including the zero-terminator. Uses `strcmp` under the hood.
+- for everything else it uses the `==` operator to determine equality. Note that this operator can be overwritten.
+
+`to_neq(...)` does the opposite of `to_eq(...)`; Can be used to test the `!=` operator on objects.
+This is handy when your custom object implements `==` and `!=` differently.
+
+`to_lt(...)`, `to_gt(...)`, `to_le(...)`, `to_ge(...)` are used to compare 'got' and 'expected' with their respective comparator (`<`, `>`, `<=`, `>=`).
+
+`to_be(...)` compares by comparing the address of both values (trys to detect if 'exactly the same')
+
+`to_be_a<T>()` (WIP) checks if the type of the value 'got' is the same type as the given type.
+- when `T` is a pointer type (such as `int*`), then `dynamic_cast` is used
+- when `T` is not a pointer type, then `std::is_same` is used
+
+`to_contain(...)` is used to check if the 'got' value contains an expected value.
+Supported (standard) types:
+- `T[]` (bounded arrays)
+- `char*` (zero-terminated)
+- All C++17 sequence containers (`std::vector`, `std::deque`, `std::array`, `std::forward_list`, `std::list`)
+- `std::string`, `std::string_view`
+- `std::map`, `std::unordered_map`
+Should generaly work on all types that implement `begin()` and `end()` iterators for use with `std::find`.
+
+`to_match(...)` is used to compare strings against an regex
+Versions:
+- `to_match(<string> [,<regex flags> [,<match flags>]])`
+- `to_match(<string> [,<match flags> [,<regex flags>]])`
+Where `regex flags` are all flags that are used when creating an `std::regex` (see [here](https://en.cppreference.com/w/cpp/regex/syntax_option_type)),
+while `match flags` are flags that are used to a call to `std::regex_match` or `std::regex_searc` (see [here](https://en.cppreference.com/w/cpp/regex/match_flag_type)).
+
+To express a negative expectation, just replace `to` with `to_not`.
+
+### Example cleanup
+
+In your examples you can use `cleanup(...)` to add code to run as cleanup after the example has completed, regardless the result.
+- `cleanup(std::function<void()>)` runs the given function at cleanup
+- `cleanup(void*)` adds a cleanup function to free the given pointer. Can be used instead of `free` in your example's code
 
 ### Builtin formatters
 

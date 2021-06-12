@@ -1,7 +1,11 @@
 #pragma once
 
-#include "../core/core.hpp"
+#include "../core/formatter.hpp"
+#include "./fileno.hpp"
+
 #include <ostream>
+#include <iostream>
+#include <unistd.h>
 
 namespace cxxspec {
 
@@ -14,6 +18,15 @@ namespace cxxspec {
         TextFormatter(std::ostream& stream)
             : stream(stream)
         {}
+
+        bool isAtty() {
+            return isatty( fileno(this->stream) );
+        }
+
+        bool force_colors = false;
+        bool useColors() {
+            return this->force_colors || this->isAtty();
+        }
 
     protected:
         std::ostream& stream;
