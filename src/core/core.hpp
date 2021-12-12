@@ -32,7 +32,15 @@ namespace cxxspec {
             return this->_name;
         }
 
-        void cleanup(void* ptr) {
+        template<typename T>
+        typename std::enable_if<std::is_class<T>::value, void>::type
+        cleanup(T* ptr) {
+            this->cleanup([=] () { delete ptr; });
+        }
+
+        template<typename T>
+        typename std::enable_if<!std::is_class<T>::value, void>::type
+        cleanup(T* ptr) {
             this->cleanup([=] () { free(ptr); });
         }
 
