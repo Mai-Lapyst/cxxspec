@@ -206,7 +206,9 @@ To express a negative expectation, just replace `to` with `to_not`.
 
 In your examples you can use `cleanup(...)` to add code to run as cleanup after the example has completed, regardless the result.
 - `cleanup(std::function<void()>)` runs the given function at cleanup
-- `cleanup(void*)` adds a cleanup function to free the given pointer. Can be used instead of `free` in your example's code
+- `T* cleanup(T*)` adds a cleanup function to free the given pointer. Can be used instead of `free` / `delete` in your example's code.
+    It detects automatically if the pointer given is an pointer to an class/struct and then uses `delete`, while other pointers are
+    released via `free`. Returns the given pointer to allow cleaner code
 
 ### Builtin formatters
 
