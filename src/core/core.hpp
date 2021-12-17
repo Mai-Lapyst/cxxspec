@@ -26,7 +26,7 @@ namespace cxxspec {
             : _name(name), block(block)
         {}
 
-        void run(Formatter& formatter);
+        void run(Formatter& formatter, bool hasNextExample);
 
         std::string name() const {
             return this->_name;
@@ -105,7 +105,9 @@ namespace cxxspec {
 
         void defineChilds();
 
-        void run(Formatter& formatter);
+        void run(Formatter& formatter, bool hasNextSpec);
+
+        void runMarkedOnly(Formatter& formatter, bool hasNextSpec);
 
         std::vector<Spec>& getSubSpecs() {
             return this->subspecs;
@@ -119,10 +121,27 @@ namespace cxxspec {
             return this->runs;
         }
 
+        bool isMarked() const {
+            return this->marked;
+        }
+
+        void mark() {
+            this->marked = true;
+        }
+
+        bool hasMarkedSubSpecs() const {
+            return this->markedSubSpecs;
+        }
+
+        void markAsHasMarkedSubSpecs() {
+            this->markedSubSpecs = true;
+        }
+
     private:
         std::string _desc;
         Block block;
         int runs = 0;
+        bool marked = false; bool markedSubSpecs = false;
         bool defined = false;
 
         std::vector<Spec> subspecs;

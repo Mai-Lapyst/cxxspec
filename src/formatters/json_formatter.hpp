@@ -24,10 +24,10 @@ namespace cxxspec {
         void onEndTesting();
 
         void onEnterSpec(Spec& spec);
-        void onLeaveSpec(Spec& spec);
+        void onLeaveSpec(Spec& spec, bool hasNextElement);
 
         void onEnterExample(Example& example);
         void onExampleResult(Example& example, bool result, std::string reason);
-        void onLeaveExample(Example& example);
+        void onLeaveExample(Example& example, bool hasNextElement);
     };
 }

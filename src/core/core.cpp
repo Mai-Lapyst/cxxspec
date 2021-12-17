@@ -1,9 +1,11 @@
 #include "./core/core.hpp"
 #include "./core/exceptions.hpp"
 
+#include <algorithm>
+
 namespace cxxspec {
 
-    void Example::run(Formatter& formatter) {
+    void Example::run(Formatter& formatter, bool hasNextExample) {
         formatter.onEnterExample(*this);
 
         try {
@@ -14,7 +16,7 @@ namespace cxxspec {
             formatter.onExampleResult(*this, false, e.what());
         }
 
-        formatter.onLeaveExample(*this);
+        formatter.onLeaveExample(*this, hasNextExample);
 
         for (CleanupBlock& block : this->cleanupBlocks) {
             block();
@@ -63,21 +65,49 @@ namespace cxxspec {
         this->defined = true;
     }
 
-    void Spec::run(Formatter& formatter) {
+    void Spec::run(Formatter& formatter, bool hasNextSpec) {
         this->defineChilds();
 
         formatter.onEnterSpec(*this);
 
-        for (Spec& spec : this->subspecs) {
-            spec.run(formatter);
+        int subspecLimit = this->subspecs.size() - 1;
+        for (int i = 0; i <= subspecLimit; i++) {
+            Spec& spec = this->subspecs.at(i);
+            spec.run(formatter, i < subspecLimit || this->examples.size() > 0);
         }
 
-        for (Example& ex : this->examples) {
-            ex.run(formatter);
+        int exampleLimit = this->examples.size() - 1;
+        for (int i = 0; i <= exampleLimit; i++) {
+            Example& ex = this->examples.at(i);
+            ex.run(formatter, i < exampleLimit);
         }
 
-        formatter.onLeaveSpec(*this);
+        formatter.onLeaveSpec(*this, hasNextSpec);
         this->runs += 1;
+    }
+
+    void Spec::runMarkedOnly(Formatter& formatter, bool hasNextSpec) {
+        if (this->marked) {
+            // run normaly all subspecs & examples
+            this->run(formatter, hasNextSpec);
+        }
+        else if (this->markedSubSpecs) {
+            // run runMarkedOnly on subspecs that are either isMarked() or hasMarkedSubSpecs()
+
+            this->subspecs.erase(
+                std::remove_if(this->subspecs.begin(), this->subspecs.end(), [] (Spec& spec) -> bool {
+                    return !spec.isMarked() && !spec.hasMarkedSubSpecs();
+                }),
+                this->subspecs.end()
+            );
+
+            int subspecLimit = this->subspecs.size() - 1;
+            for (int i = 0; i <= subspecLimit; i++) {
+                Spec& spec = this->subspecs.at(i);
+                spec.run(formatter, i < subspecLimit);
+            }
+
+        }
     }
 
 }

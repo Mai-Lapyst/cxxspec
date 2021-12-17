@@ -11,7 +11,7 @@ namespace cxxspec {
 
     extern std::vector<Spec> all_specs;
 
-    void runAllSpecs(Formatter& formatter);
+    void runAllSpecs(Formatter& formatter, bool onlyMarked = false);
 
     void runSpecs(std::vector<std::string>& arguments);
 

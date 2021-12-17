@@ -11,11 +11,29 @@ namespace cxxspec {
 
     std::vector<Spec> all_specs = std::vector<Spec>();
 
-    void runAllSpecs(Formatter& formatter) {
+    void runAllSpecs(Formatter& formatter, bool onlyMarked) {
         formatter.onBeginTesting();
-        for (Spec& spec : all_specs) {
-            spec.run(formatter);
+
+        if (onlyMarked) {
+            all_specs.erase(
+                std::remove_if(all_specs.begin(), all_specs.end(), [] (Spec& spec) -> bool {
+                    return !spec.isMarked() && !spec.hasMarkedSubSpecs();
+                }),
+                all_specs.end()
+            );
         }
+
+        int specLimit = all_specs.size() - 1;
+        for (int i = 0; i <= specLimit; i++) {
+            Spec& spec = all_specs.at(i);
+            if (!onlyMarked) {
+                spec.run(formatter, i < specLimit);
+            }
+            else {
+                spec.runMarkedOnly(formatter, i < specLimit);
+            }
+        }
+
         formatter.onEndTesting();
     }
 
@@ -34,8 +52,7 @@ namespace cxxspec {
         runSpecs(args);
     }
 
-    void runSpec(Formatter& formatter, std::string specpath, std::vector<Spec>& list, std::size_t off = 0UL) {
-        //std::cout << "runSpec(..., " << specpath << ", [..])\n";
+    bool markSpec(Formatter& formatter, std::string specpath, std::vector<Spec>& list, std::size_t off = 0UL) {
 
         std::size_t pos = specpath.find_first_of('/', off);
         std::string name = specpath.substr(off, pos);
@@ -53,13 +70,18 @@ namespace cxxspec {
             (*iter).defineChilds();
 
             std::vector<Spec>& sublist = (*iter).getSubSpecs();
-            runSpec(formatter, specpath, sublist, pos + 1);
-        }
-        else {
-            if ((*iter).getRuns() <= 0) {
-                (*iter).run(formatter);
+            if (markSpec(formatter, specpath, sublist, pos + 1)) {
+                (*iter).markAsHasMarkedSubSpecs();
             }
         }
+        else {
+            (*iter).mark();
+            return true;
+            // if ((*iter).getRuns() <= 0) {
+            //     (*iter).run(formatter);
+            // }
+        }
+        return false;
     }
 
     enum FormatterType {
@@ -164,9 +186,12 @@ namespace cxxspec {
             // try to find specs to run...
             try {
                 std::sort(to_run.begin(), to_run.end());
-                for (std::string& specpath : to_run) {
-                    runSpec(*formatter, specpath, all_specs);
+                int specPathLimit = to_run.size() - 1;
+                for (int i = 0; i <= specPathLimit; i++) {
+                    std::string& specpath = to_run.at(i);
+                    markSpec(*formatter, specpath, all_specs);
                 }
+                runAllSpecs(*formatter, true);
             }
             catch (std::runtime_error e) {
                 std::cout << e.what() << '\n';

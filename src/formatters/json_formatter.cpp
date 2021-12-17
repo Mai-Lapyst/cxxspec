@@ -29,11 +29,11 @@ namespace cxxspec {
             i(); stream << "\"body\": [" << endl;
             chi(1);
     }
-    void JsonFormatter::onLeaveSpec(Spec& spec) {
+    void JsonFormatter::onLeaveSpec(Spec& spec, bool hasNextElement) {
             chi(-1);
             i(); stream << "]" << endl;
         chi(-1);
-        i(); stream << "}" << endl;
+        i(); stream << "}" << (hasNextElement ? "," : "") << endl;
     }
 
     void JsonFormatter::onEnterExample(Example& example) {
@@ -48,9 +48,9 @@ namespace cxxspec {
             i(); stream << "\"reason\": \"" << reason << "\"" << endl;
     }
 
-    void JsonFormatter::onLeaveExample(Example& example) {
+    void JsonFormatter::onLeaveExample(Example& example, bool hasNextElement) {
         chi(-1);
-        i(); stream << "}" << endl;
+        i(); stream << "}" << (hasNextElement ? "," : "") << endl;
     }
 
 }

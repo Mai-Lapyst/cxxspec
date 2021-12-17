@@ -30,7 +30,7 @@ namespace cxxspec {
         i(); stream << spec.desc() << "\n";
         chi(1);
     }
-    void CliFormatter::onLeaveSpec(Spec& spec) {
+    void CliFormatter::onLeaveSpec(Spec& spec, bool hasNextElement) {
         chi(-1);
         if (!last_line_empty) {
             stream << "\n";
@@ -60,6 +60,6 @@ namespace cxxspec {
         if (this->useColors())
             stream << "\e[0m";
     }
-    void CliFormatter::onLeaveExample(Example& example) {}
+    void CliFormatter::onLeaveExample(Example& example, bool hasNextElement) {}
 
 }
