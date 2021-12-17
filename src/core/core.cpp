@@ -2,18 +2,31 @@
 #include "./core/exceptions.hpp"
 
 #include <algorithm>
+#include <chrono>
 
 namespace cxxspec {
 
     void Example::run(Formatter& formatter, bool hasNextExample) {
+        using std::chrono::high_resolution_clock;
+        using time_point = std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>;
+
         formatter.onEnterExample(*this);
 
+        time_point startPoint;
+        time_point endPoint;
         try {
+            startPoint = high_resolution_clock::now();
             this->block(*this);
-            formatter.onExampleResult(*this, true, "");
+            endPoint = high_resolution_clock::now();
+
+            ExampleDuration diff = endPoint - startPoint;
+            formatter.onExampleResult(*this, true, "", diff);
         }
         catch (ExpectFailError e) {
-            formatter.onExampleResult(*this, false, e.what());
+            endPoint = high_resolution_clock::now();
+
+            ExampleDuration diff = endPoint - startPoint;
+            formatter.onExampleResult(*this, false, e.what(), diff);
         }
 
         formatter.onLeaveExample(*this, hasNextExample);

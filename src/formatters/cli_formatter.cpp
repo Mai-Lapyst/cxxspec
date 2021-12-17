@@ -39,7 +39,7 @@ namespace cxxspec {
     }
 
     void CliFormatter::onEnterExample(Example& example) {}
-    void CliFormatter::onExampleResult(Example& example, bool result, std::string reason) {
+    void CliFormatter::onExampleResult(Example& example, bool result, std::string reason, ExampleDuration timeTaken) {
         last_line_empty = false;
 
         if (result) {

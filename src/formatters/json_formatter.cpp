@@ -35,9 +35,10 @@ namespace cxxspec {
             i(); stream << "\"name\": \"" << example.name() << "\"," << endl;
     }
 
-    void JsonFormatter::onExampleResult(Example& example, bool result, std::string reason) {
+    void JsonFormatter::onExampleResult(Example& example, bool result, std::string reason, ExampleDuration timeTaken) {
             i(); stream << "\"result\": " << (result ? "\"success\"" : "\"failed\"") << "," << endl;
-            i(); stream << "\"reason\": \"" << reason << "\"" << endl;
+            i(); stream << "\"reason\": \"" << reason << "\"," << endl;
+            i(); stream << "\"time_ns\": " << timeTaken.count() << endl;
     }
 
     void JsonFormatter::onLeaveExample(Example& example, bool hasNextElement) {

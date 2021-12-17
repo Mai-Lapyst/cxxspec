@@ -18,7 +18,7 @@ namespace cxxspec {
         void onLeaveSpec(Spec& spec, bool hasNextElement);
 
         void onEnterExample(Example& example);
-        void onExampleResult(Example& example, bool result, std::string reason);
+        void onExampleResult(Example& example, bool result, std::string reason, ExampleDuration timeTaken);
         void onLeaveExample(Example& example, bool hasNextElement);
     };
 }
