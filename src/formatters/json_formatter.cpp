@@ -4,14 +4,6 @@
 
 namespace cxxspec {
 
-    #define PRETTY_NEWLINE      if (this->pretty) { stream << "\n"; }
-
-    void JsonFormatter::i() {
-        if (this->pretty) {
-            TextFormatter::i();
-        }
-    }
-
     void JsonFormatter::onBeginTesting() {
         stream << "[" << endl;
         chi(1);

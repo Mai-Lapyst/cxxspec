@@ -1,24 +1,15 @@
 #pragma once
 
 #include "../core/core.hpp"
-#include "./text_formatter.hpp"
+#include "./prettyable_formatter.hpp"
 
 #include <ostream>
 
 namespace cxxspec {
-    class JsonFormatter : public TextFormatter {
-    private:
-        bool pretty = true;
-        const char* endl;
-
-    protected:
-        void i();
-
+    class JsonFormatter : public PrettyableFormatter {
     public:
 
-        JsonFormatter(std::ostream& stream, bool pretty = true)
-            : TextFormatter(stream), pretty(pretty), endl(pretty ? "\n" : "")
-        {}
+        JsonFormatter(std::ostream& stream, bool pretty = true) : PrettyableFormatter(stream, pretty) {}
 
         void onBeginTesting();
         void onEndTesting();
