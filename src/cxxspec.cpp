@@ -105,6 +105,15 @@ namespace cxxspec {
                         force_colors = true;
                         continue;
                     }
+                    else if (arg == "-h" || arg == "--help") {
+                        puts("Usage: specs [<options>] <specs to run>");
+                        puts("Available options:");
+                        puts("  -h, --help          Displays this help");
+                        puts("  -f <output>         Writes output instead of stdout to the specified file.");
+                        puts("  --force-colors      Forces colorized output, even when writing to file");
+                        puts("  --format <format>   Outputs in the given format. Available: cli, json");
+                        exit(1);
+                    }
                     else {
                         throw std::runtime_error("Unknown option: " + arg);
                     }
