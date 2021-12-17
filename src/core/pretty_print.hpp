@@ -84,21 +84,21 @@ namespace cxxspec {
         }
 
         template<>
-        std::string inspect<const char *>(const char *& o) {
+        inline std::string inspect<const char *>(const char *& o) {
             std::stringstream ss;
             ss << "(const char*) \"" << o << '"';
             return ss.str();
         }
 
         template<>
-        std::string inspect<std::string>(std::string& o) {
+        inline std::string inspect<std::string>(std::string& o) {
             std::stringstream ss;
             ss << "(std::string) \"" << o << '"';
             return ss.str();
         }
 
         template<>
-        std::string inspect<const std::string>(const std::string& o) {
+        inline std::string inspect<const std::string>(const std::string& o) {
             std::stringstream ss;
             ss << "(std::string) \"" << o << '"';
             return ss.str();
@@ -106,14 +106,14 @@ namespace cxxspec {
 
         #if __cplusplus >= 201703L
             template<>
-            std::string inspect<std::string_view>(std::string_view& o) {
+            inline std::string inspect<std::string_view>(std::string_view& o) {
                 std::stringstream ss;
                 ss << "(std::string_view) \"" << o << '"';
                 return ss.str();
             }
 
             template<>
-            std::string inspect<const std::string_view>(const std::string_view& o) {
+            inline std::string inspect<const std::string_view>(const std::string_view& o) {
                 std::stringstream ss;
                 ss << "(std::string_view) \"" << o << '"';
                 return ss.str();
@@ -123,7 +123,7 @@ namespace cxxspec {
         //----------------------------------------
 
         template<typename T1, typename T2>
-        std::ostream& operator<<(std::ostream& stream, std::pair<T1, T2> pair) {
+        inline std::ostream& operator<<(std::ostream& stream, std::pair<T1, T2> pair) {
             stream << '{' << inspect_body<T1>(pair.first) << ", " << inspect_body<T2>(pair.second) << "}";
             return stream;
         };
