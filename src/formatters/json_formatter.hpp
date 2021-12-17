@@ -7,9 +7,18 @@
 
 namespace cxxspec {
     class JsonFormatter : public TextFormatter {
+    private:
+        bool pretty = true;
+        const char* endl;
+
+    protected:
+        void i();
+
     public:
 
-        JsonFormatter(std::ostream& stream) : TextFormatter(stream) {}
+        JsonFormatter(std::ostream& stream, bool pretty = true)
+            : TextFormatter(stream), pretty(pretty), endl(pretty ? "\n" : "")
+        {}
 
         void onBeginTesting();
         void onEndTesting();

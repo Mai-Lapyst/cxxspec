@@ -73,6 +73,7 @@ namespace cxxspec {
         std::string output_file = "-";
         FormatterType formatter_type = FT_CLI;
         bool force_colors = false;
+        bool pretty_print = true;
 
         std::vector<std::string> to_run;
         try {
@@ -112,7 +113,18 @@ namespace cxxspec {
                         puts("  -f <output>         Writes output instead of stdout to the specified file.");
                         puts("  --force-colors      Forces colorized output, even when writing to file");
                         puts("  --format <format>   Outputs in the given format. Available: cli, json");
+                        puts("  -j, --json          Equivalent to --format json");
+                        puts("  -c, --compact       Disables pretty printing of output for some formats.");
+                        puts("                      Suported by: json");
                         exit(1);
+                    }
+                    else if (arg == "-j" || arg == "--json") {
+                        formatter_type = FT_JSON;
+                        continue;
+                    }
+                    else if (arg == "-c" || arg == "--compact") {
+                        pretty_print = false;
+                        continue;
                     }
                     else {
                         throw std::runtime_error("Unknown option: " + arg);
@@ -140,7 +152,7 @@ namespace cxxspec {
                 break;
 
             case FT_JSON:
-                formatter = new JsonFormatter(*stream);
+                formatter = new JsonFormatter(*stream, pretty_print);
                 ((TextFormatter*)formatter)->force_colors = force_colors;
                 break;
         }
