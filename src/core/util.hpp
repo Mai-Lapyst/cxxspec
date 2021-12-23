@@ -9,6 +9,7 @@ namespace cxxspec {
     namespace util {
 
         std::string demangle(const char* mangledName);
+        std::string current_exception_typename();
 
         template<typename T>
         const T& unmove(T&& param) { return param; }

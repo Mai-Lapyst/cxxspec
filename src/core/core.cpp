@@ -28,6 +28,23 @@ namespace cxxspec {
             ExampleDuration diff = endPoint - startPoint;
             formatter.onExampleResult(*this, false, e.what(), diff);
         }
+        catch (const std::exception& e) {
+            endPoint = high_resolution_clock::now();
+
+            ExampleDuration diff = endPoint - startPoint;
+            std::stringstream ss;
+            ss << "Throwed uncatched & unexpected exception: (" << util::current_exception_typename() << ") => " << e.what();
+            formatter.onExampleResult(*this, false, ss.str(), diff);
+        }
+        catch (const std::exception* e) {
+            endPoint = high_resolution_clock::now();
+
+            ExampleDuration diff = endPoint - startPoint;
+            std::stringstream ss;
+            ss << "Throwed uncatched & unexpected exception: (" << util::current_exception_typename() << ") => " << e->what();
+            delete e;
+            formatter.onExampleResult(*this, false, ss.str(), diff);
+        }
 
         formatter.onLeaveExample(*this, hasNextExample);
 
@@ -63,7 +80,7 @@ namespace cxxspec {
         }
         catch (...) {
             std::stringstream ss;
-            ss << "Expected to not throw, but did (got unknown exception type)";
+            ss << "Expected to not throw, but did (" << util::current_exception_typename() << ")";
             throw ExpectFailError(ss.str());
         }
     }

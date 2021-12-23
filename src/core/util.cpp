@@ -17,9 +17,16 @@ namespace cxxspec {
                     abi::__cxa_demangle(mangledName, NULL, NULL, &status), std::free};
                 return (status == 0) ? result.get() : mangledName;
             }
+
+            std::string current_exception_typename() {
+                return demangle(abi::__cxa_current_exception_type()->name());
+            }
         #else
             std::string demangle(const char* mangledName) {
                 return mangledName;
+            }
+            std::string current_exception_typename() {
+                return "got unknown exception type";
             }
         #endif
 
