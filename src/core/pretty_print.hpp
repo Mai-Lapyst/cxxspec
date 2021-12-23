@@ -46,6 +46,9 @@ namespace cxxspec {
         template<typename T>
         typename std::enable_if<util::is_c_str<T>::value, std::string>::type
         inline inspect_body(T& obj) {
+            if (obj == nullptr) {
+                return "nullptr";
+            }
             std::stringstream ss;
             ss << '"' << obj << '"';
             return ss.str();
