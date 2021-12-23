@@ -68,6 +68,7 @@ namespace cxxspec {
             }
 
             bool _match(const T_got& got, cstring_type) {
+                if (got == nullptr) { return this->expected_value == nullptr; }
                 return (std::strcmp(got, this->expected_value) == 0);
             }
 

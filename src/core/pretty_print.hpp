@@ -52,8 +52,16 @@ namespace cxxspec {
         }
 
         template<typename T>
+        typename std::enable_if<util::is_pairish<T>::value, std::string>::type
+        inline inspect_body(T& obj) {
+            std::stringstream ss;
+            ss << obj;
+            return ss.str();
+        }
+
+        template<typename T>
         typename std::enable_if<
-            !util::is_streamable<T>::value && !util::is_iterateable<T>::value && !util::is_c_str<T>::value,
+            !util::is_streamable<T>::value && !util::is_iterateable<T>::value && !util::is_c_str<T>::value && !util::is_pairish<T>::value,
             std::string
         >::type
         inline inspect_body(T& obj) {
@@ -85,6 +93,9 @@ namespace cxxspec {
 
         template<>
         inline std::string inspect<const char *>(const char *& o) {
+            if (o == nullptr) {
+                return "(const char*) nullptr";
+            }
             std::stringstream ss;
             ss << "(const char*) \"" << o << '"';
             return ss.str();
