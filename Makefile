@@ -17,9 +17,6 @@ endif
 
 CFLAGS = -O3 -Isrc
 
-CXX = clang++
-CC = clang
-
 all: libcxxspec specs
 
 libcxxspec: $(BUILD_PREFIX)/libcxxspec.so
@@ -35,11 +32,11 @@ $(BUILD_PREFIX)/specs.run: $(SPEC_OBJS)
 
 $(LIB_OBJS_PREFIX)/%.o: %.cpp
 	@mkdir -p "$(@D)"
-	$(CC) -c -Qunused-arguments -m64 -fPIC $(CFLAGS) -DNDEBUG -o $@ $^
+	$(CC) -c -m64 -fPIC $(CFLAGS) -DNDEBUG -o $@ $^
 
 $(SPEC_OBJS_PREFIX)/%.o: %.cpp
 	@mkdir -p "$(@D)"
-	$(CC) -c -Qunused-arguments -m64 -fvisibility=hidden -fvisibility-inlines-hidden $(CFLAGS) -DNDEBUG -o $@ $^
+	$(CC) -c -m64 -fvisibility=hidden -fvisibility-inlines-hidden $(CFLAGS) -DNDEBUG -o $@ $^
 
 install: libcxxspec
 	install -d $(PREFIX)/lib/
