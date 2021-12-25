@@ -23,7 +23,7 @@ namespace cxxspec {
 
         for (JunitTestcase& testcase : this->testcases) {
             i(); stream << "<testcase";
-                stream << " classname=\"<cpp-file>\"";
+                stream << " classname=\"" << testcase.sourcefile << "\"";
                 stream << " name=\"" << testcase.name << "\"";
                 stream << " time=\"" << testcase.timeTaken.count() << "\"";
             if (testcase.result) {
@@ -54,7 +54,7 @@ namespace cxxspec {
     void JunitFormatter::onEnterExample(Example& example) {}
     void JunitFormatter::onExampleResult(Example& example, bool result, std::string reason, ExampleDuration timeTaken) {
         JunitDuration time = std::chrono::duration_cast<JunitDuration>(timeTaken);
-        testcases.push_back(JunitTestcase(example.fullname(), result, reason, time));
+        testcases.push_back(JunitTestcase(example.fullname(), example.sourcefile(), result, reason, time));
         timeSum += timeTaken;
         if (!result) {
             failures++;

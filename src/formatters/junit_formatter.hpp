@@ -11,14 +11,15 @@ namespace cxxspec {
     class JunitTestcase {
     private:
         std::string name;
+        std::string sourcefile;
         JunitDuration timeTaken;
         bool result;
         std::string reason;
 
         friend class JunitFormatter;
     public:
-        JunitTestcase(std::string name, bool result, std::string reason, JunitDuration timeTaken)
-            : name(name), result(result), reason(reason), timeTaken(timeTaken)
+        JunitTestcase(std::string name, std::string sourcefile, bool result, std::string reason, JunitDuration timeTaken)
+            : name(name), sourcefile(sourcefile), result(result), reason(reason), timeTaken(timeTaken)
         {}
     };
 

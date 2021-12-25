@@ -36,7 +36,7 @@ namespace cxxspec {
     #define explain     self._context
     #define context     self._context
 
-    #define it  self._it
+    #define it(name, ...)  self._it(name, __FILE__, __VA_ARGS__)
 
     #define expect      self.expect
     #define cleanup     self.cleanup

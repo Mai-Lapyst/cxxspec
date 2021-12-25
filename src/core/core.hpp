@@ -32,6 +32,10 @@ namespace cxxspec {
             : _name(name), block(block), parent(parent)
         {}
 
+        Example(std::string name, std::string sourcefile, Block block, DescribeAble* parent)
+            : _name(name), _sourcefile(sourcefile), block(block), parent(parent)
+        {}
+
         void run(Formatter& formatter, bool hasNextExample);
 
         std::string fullname() const {
@@ -40,6 +44,10 @@ namespace cxxspec {
 
         std::string name() const {
             return this->_name;
+        }
+
+        std::string sourcefile() const {
+            return this->_sourcefile;
         }
 
         template<typename T>
@@ -89,6 +97,7 @@ namespace cxxspec {
 
     private:
         std::string _name;
+        std::string _sourcefile = "unknown";
         Block block;
         std::vector<CleanupBlock> cleanupBlocks;
         DescribeAble* parent;
@@ -110,8 +119,16 @@ namespace cxxspec {
             this->examples.push_back(Example(name, block, this));
         }
 
+        inline void _it(std::string name, std::string sourcefile, Example::Block block) {
+            this->examples.push_back(Example(name, sourcefile, block, this));
+        }
+
         inline void _it(const char* name, Example::Block block) {
             this->_it(std::string(name), block);
+        }
+
+        inline void _it(const char* name, const char* sourcefile, Example::Block block) {
+            this->_it(std::string(name), std::string(sourcefile), block);
         }
 
         void defineChilds();
