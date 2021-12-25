@@ -52,7 +52,8 @@ namespace cxxspec {
 
         for (JunitTestcase& testcase : this->testcases) {
             i(); stream << "<testcase";
-                stream << " classname=\"" << testcase.sourcefile << "\"";
+                std::string classname = testcase.sourcefile.substr(0, testcase.sourcefile.find_last_of("."));
+                stream << " classname=\"" << classname << "\"";
                 stream << " name=\"" << escapeString(testcase.name) << "\"";
                 stream << " time=\"" << testcase.timeTaken.count() << "\"";
             if (testcase.result) {
@@ -66,7 +67,8 @@ namespace cxxspec {
                         stream << " type=\"expect\"";
                         stream << ">" << endl;
                     chi(1);
-                        i(); stream << "<![CDATA[" << " ... " << "]]>" << endl;
+                        // content of an failure element is the stacktrace
+                        i(); stream << "<![CDATA[" << "]]>" << endl;
                     chi(-1);
                     i(); stream << "</failure>" << endl;
                 chi(-1);
