@@ -16,17 +16,27 @@ namespace cxxspec {
     class Expectation;
     // -------------------------
 
+    class DescribeAble {
+    public:
+        virtual std::string fulldesc() const = 0;
+        virtual std::string desc() const = 0;
+    };
+
     class Example {
     public:
         typedef std::function<void (Example&)> Block;
         typedef std::function<void()> ExBlock;
         typedef std::function<void()> CleanupBlock;
 
-        Example(std::string name, Block block)
-            : _name(name), block(block)
+        Example(std::string name, Block block, DescribeAble* parent)
+            : _name(name), block(block), parent(parent)
         {}
 
         void run(Formatter& formatter, bool hasNextExample);
+
+        std::string fullname() const {
+            return this->parent->fulldesc() + " " + this->_name;
+        }
 
         std::string name() const {
             return this->_name;
@@ -81,22 +91,23 @@ namespace cxxspec {
         std::string _name;
         Block block;
         std::vector<CleanupBlock> cleanupBlocks;
+        DescribeAble* parent;
     };
 
-    class Spec {
+    class Spec : public DescribeAble {
     public:
         typedef std::function<void (Spec&)> Block;
 
-        Spec(std::string desc, Block block)
-            : _desc(desc), block(block)
+        Spec(std::string desc, Block block, DescribeAble* parent = nullptr)
+            : _desc(desc), block(block), parent(parent)
         {}
 
         inline void _context(std::string name, Block block) {
-            this->subspecs.push_back(Spec(name, block));
+            this->subspecs.push_back(Spec(name, block, this));
         }
 
         inline void _it(std::string name, Example::Block block) {
-            this->examples.push_back(Example(name, block));
+            this->examples.push_back(Example(name, block, this));
         }
 
         inline void _it(const char* name, Example::Block block) {
@@ -111,6 +122,13 @@ namespace cxxspec {
 
         std::vector<Spec>& getSubSpecs() {
             return this->subspecs;
+        }
+
+        std::string fulldesc() const {
+            if (this->parent == nullptr) {
+                return this->_desc;
+            }
+            return this->parent->fulldesc() + " " + this->_desc;
         }
 
         std::string desc() const {
@@ -146,6 +164,8 @@ namespace cxxspec {
 
         std::vector<Spec> subspecs;
         std::vector<Example> examples;
+
+        DescribeAble* parent;
     };
 
 }
