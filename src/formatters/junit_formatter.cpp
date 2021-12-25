@@ -1,8 +1,37 @@
 #include "./junit_formatter.hpp"
 
 #include <ctime>
+#include <algorithm>
 
 namespace cxxspec {
+
+    static std::string escapeString(std::string str) {
+        std::string buf;
+        buf.reserve(str.size());
+        for (std::size_t pos = 0; pos != str.size(); pos++) {
+            switch (str[pos]) {
+                case '&':
+                    buf.append("&amp;");
+                    break;
+                case '\"':
+                    buf.append("&quot;");
+                    break;
+                case '\'':
+                    buf.append("&apos;");
+                    break;
+                case '<':
+                    buf.append("&lt;");
+                    break;
+                case '>':
+                    buf.append("&gt;");
+                    break;
+                default:
+                    buf.append(&str[pos], 1);
+                    break;
+            }
+        }
+        return buf;
+    }
 
     void JunitFormatter::onBeginTesting() {}
     void JunitFormatter::onEndTesting() {
@@ -24,7 +53,7 @@ namespace cxxspec {
         for (JunitTestcase& testcase : this->testcases) {
             i(); stream << "<testcase";
                 stream << " classname=\"" << testcase.sourcefile << "\"";
-                stream << " name=\"" << testcase.name << "\"";
+                stream << " name=\"" << escapeString(testcase.name) << "\"";
                 stream << " time=\"" << testcase.timeTaken.count() << "\"";
             if (testcase.result) {
                 stream << "/>" << endl;
@@ -33,7 +62,7 @@ namespace cxxspec {
                 stream << ">" << endl;
                 chi(1);
                     i(); stream << "<failure";
-                        stream << " message=\"" << testcase.reason << "\"";
+                        stream << " message=\"" << escapeString(testcase.reason) << "\"";
                         stream << " type=\"expect\"";
                         stream << ">" << endl;
                 chi(-1);
