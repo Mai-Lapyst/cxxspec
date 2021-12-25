@@ -1,6 +1,7 @@
 #include "./cxxspec.hpp"
 #include "./formatters/cli_formatter.hpp"
 #include "./formatters/json_formatter.hpp"
+#include "./formatters/junit_formatter.hpp"
 
 #include <iostream>
 #include <vector>
@@ -85,7 +86,7 @@ namespace cxxspec {
     }
 
     enum FormatterType {
-        FT_CLI, FT_JSON
+        FT_CLI, FT_JSON, FT_JUNIT
     };
 
     void runSpecs(std::vector<std::string>& arguments) {
@@ -112,6 +113,9 @@ namespace cxxspec {
                         }
                         else if (arg == "json") {
                             formatter_type = FT_JSON;
+                        }
+                        else if (arg == "junit") {
+                            formatter_type = FT_JUNIT;
                         }
                         else {
                             throw std::runtime_error("Unknown formatter: " + arg);
@@ -175,6 +179,11 @@ namespace cxxspec {
 
             case FT_JSON:
                 formatter = new JsonFormatter(*stream, pretty_print);
+                ((TextFormatter*)formatter)->force_colors = force_colors;
+                break;
+
+            case FT_JUNIT:
+                formatter = new JunitFormatter(*stream, pretty_print);
                 ((TextFormatter*)formatter)->force_colors = force_colors;
                 break;
         }
