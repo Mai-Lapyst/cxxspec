@@ -65,6 +65,10 @@ namespace cxxspec {
                         stream << " message=\"" << escapeString(testcase.reason) << "\"";
                         stream << " type=\"expect\"";
                         stream << ">" << endl;
+                    chi(1);
+                        i(); stream << "<![CDATA[" << " ... " << "]]>" << endl;
+                    chi(-1);
+                    i(); stream << "</failure>" << endl;
                 chi(-1);
                 i(); stream << "</testcase>" << endl;
             }
