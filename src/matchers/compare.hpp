@@ -59,7 +59,7 @@ namespace cxxspec {
             std::string compare_text() {
                 switch ( check_type::value ) {
                     case cstring_type::value:
-                        return "to be equal (`strcmp() == 0`) with";
+                        return "to be equal (`strcmp() == 0`) with";    // TODO: not accurate when one of the sides is nullptr
                     case carray_type::value:
                         return "to be equal with";
                     default:
@@ -69,6 +69,7 @@ namespace cxxspec {
 
             bool _match(const T_got& got, cstring_type) {
                 if (got == nullptr) { return this->expected_value == nullptr; }
+                if (this->expected_value == nullptr) { return got == nullptr; }
                 return (std::strcmp(got, this->expected_value) == 0);
             }
 
@@ -120,7 +121,7 @@ namespace cxxspec {
             std::string compare_text() {
                 switch ( check_type::value ) {
                     case cstring_type::value:
-                        return "to be not equal (`strcmp() != 0`) with";
+                        return "to be not equal (`strcmp() != 0`) with";    // TODO: not accurate when one of the sides is nullptr
                     case carray_type::value:
                         return "to be not equal with";
                     default:
@@ -129,7 +130,8 @@ namespace cxxspec {
             }
 
             bool _match(const T_got& got, cstring_type) {
-                if (got == nullptr) { return this->expected_value == nullptr; }
+                if (got == nullptr) { return this->expected_value != nullptr; }
+                if (this->expected_value == nullptr) { return got != nullptr; }
                 return (std::strcmp(got, this->expected_value) != 0);
             }
 
