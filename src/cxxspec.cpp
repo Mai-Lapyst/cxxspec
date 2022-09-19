@@ -138,7 +138,7 @@ namespace cxxspec {
                         puts("  -h, --help          Displays this help");
                         puts("  -f <output>         Writes output instead of stdout to the specified file.");
                         puts("  --force-colors      Forces colorized output, even when writing to file");
-                        puts("  --format <format>   Outputs in the given format. Available: cli, json");
+                        puts("  --format <format>   Outputs in the given format. Available: cli, json, junit");
                         puts("  -j, --json          Equivalent to --format json");
                         puts("  -c, --compact       Disables pretty printing of output for some formats.");
                         puts("                      Suported by: json");
