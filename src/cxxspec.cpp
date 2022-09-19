@@ -137,12 +137,12 @@ namespace cxxspec {
                         puts("Usage: specs [<options>] <specs to run>");
                         puts("Available options:");
                         puts("  -h, --help          Displays this help");
-                        puts("  -f <output>         Writes output instead of stdout to the specified file.");
+                        puts("  -f <output>         Writes output to the specified file instead of the standard output.");
                         puts("  --force-colors      Forces colorized output, even when writing to file");
                         puts("  --format <format>   Outputs in the given format. Available: cli, json, junit");
                         puts("  -j, --json          Equivalent to --format json");
                         puts("  -c, --compact       Disables pretty printing of output for some formats.");
-                        puts("                      Suported by: json");
+                        puts("                      Supported by: json");
                         puts("  -t, --time          Displays time taken when using the cli format");
                         exit(1);
                     }
