@@ -53,14 +53,18 @@ namespace cxxspec {
         template<typename T>
         typename std::enable_if<std::is_class<T>::value, T*>::type
         cleanup(T* ptr) {
-            this->cleanup([=] () { delete ptr; });
+            this->cleanup([=] () {
+                delete ptr;
+            });
             return ptr;
         }
 
         template<typename T>
         typename std::enable_if<!std::is_class<T>::value, T*>::type
         cleanup(T* ptr) {
-            this->cleanup([=] () { free(ptr); });
+            this->cleanup([=] () {
+                free(ptr);
+            });
             return ptr;
         }
 
