@@ -18,7 +18,7 @@ For license details please see the file `LICENSE`.
     - has_key & has_value
     - ...
 - enhance the system that allows us to access protected members of other classes (`ALLOW_SPEC`)
-- implement `before`, `after` and `around` hooks
+- implement `around` hooks
 - formatters
     - xml
     - junit
@@ -201,6 +201,52 @@ Where `regex flags` are all flags that are used when creating an `std::regex` (s
 while `match flags` are flags that are used to a call to `std::regex_match` or `std::regex_searc` (see [here](https://en.cppreference.com/w/cpp/regex/match_flag_type)).
 
 To express a negative expectation, just replace `to` with `to_not`.
+
+### Hooks
+
+Like rspec, cxxspec allows for some hooks to be added:
+- `before_all` & `after_all` will run when the spec they are defined on is entered & exited respecitvely.
+    Example:
+    ```c++
+    describe(Top, $ {
+        before_all({ std::cout << "before all hook called\n"; });
+        after_all({ std::cout << "after all hook called\n"; });
+
+        it("test 1", _ { std::cout << "running test 1\n"; });
+        it("test 2", _ { std::cout << "running test 2\n"; });
+    });
+
+    /*
+    Output:
+    before all hook called
+    running test 1
+    running test 2
+    after all hook called
+    */
+    ```
+
+- `before_each` & `after_each` will run with the example as the argument `example` when a example is about to be run & has been run.
+    Additionally, each spec calls first it's parents hooks after it runs their own.
+    Example:
+    ```c++
+    describe(Top, $ {
+        before_each({ std::cout << "before each hook called\n"; });
+        after_each({ std::cout << "after each hook called\n"; });
+
+        it("test 1", _ { std::cout << "running test 1\n"; });
+        it("test 2", _ { std::cout << "running test 2\n"; });
+    });
+
+    /*
+    Output:
+    before each hook called
+    running test 1
+    after each hook called
+    before each hook called
+    running test 2
+    after each hook called
+    */
+    ```
 
 ### Example cleanup
 
