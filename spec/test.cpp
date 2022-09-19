@@ -10,6 +10,7 @@
 #include <deque>
 #include <forward_list>
 #include <list>
+#include <array>
 #include <thread>
 #include <chrono>
 
