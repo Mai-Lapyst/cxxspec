@@ -10,6 +10,8 @@
 #include <deque>
 #include <forward_list>
 #include <list>
+#include <thread>
+#include <chrono>
 
 DEFINE_SPEC(MyKlazz)
 
@@ -262,6 +264,9 @@ describe(mytest, $ {
     // test container types: https://en.cppreference.com/w/cpp/container
 
     explain("my_int_vec", $ {
+        it("should wait 3secs", _ {
+            std::this_thread::sleep_for( std::chrono::seconds(3) + std::chrono::milliseconds(10) );
+        });
         it("should be equal to [1,2,3,4]", _ {
             std::vector<int> vec({1, 2, 3, 4});
             expect(mytest::my_int_vec).to_eq(vec);

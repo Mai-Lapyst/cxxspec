@@ -40,7 +40,7 @@ namespace cxxspec {
 
     void runSpecs(int argc, char** argv) {
         if (argc <= 0) {
-            CliFormatter formatter(std::cout);
+            CliFormatter formatter(std::cout, false);
             runAllSpecs(formatter);
             return;
         }
@@ -97,6 +97,7 @@ namespace cxxspec {
         FormatterType formatter_type = FT_CLI;
         bool force_colors = false;
         bool pretty_print = true;
+        bool display_time = false;
 
         std::vector<std::string> to_run;
         try {
@@ -142,6 +143,7 @@ namespace cxxspec {
                         puts("  -j, --json          Equivalent to --format json");
                         puts("  -c, --compact       Disables pretty printing of output for some formats.");
                         puts("                      Suported by: json");
+                        puts("  -t, --time          Displays time taken when using the cli format");
                         exit(1);
                     }
                     else if (arg == "-j" || arg == "--json") {
@@ -150,6 +152,10 @@ namespace cxxspec {
                     }
                     else if (arg == "-c" || arg == "--compact") {
                         pretty_print = false;
+                        continue;
+                    }
+                    else if (arg == "-t" || arg == "--time") {
+                        display_time = true;
                         continue;
                     }
                     else {
@@ -173,7 +179,7 @@ namespace cxxspec {
         Formatter* formatter = nullptr;
         switch (formatter_type) {
             case FT_CLI:
-                formatter = new CliFormatter(*stream);
+                formatter = new CliFormatter(*stream, display_time);
                 ((TextFormatter*)formatter)->force_colors = force_colors;
                 break;
 

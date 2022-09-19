@@ -11,9 +11,10 @@ namespace cxxspec {
     private:
         void put_time();
         bool last_line_empty = false;
+        bool display_time = false;
 
     public:
-        CliFormatter(std::ostream& stream) : TextFormatter(stream) {}
+        CliFormatter(std::ostream& stream, bool display_time) : TextFormatter(stream), display_time(display_time) {}
 
         void onBeginTesting();
         void onEndTesting();
