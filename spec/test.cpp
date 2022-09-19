@@ -63,6 +63,13 @@ namespace mytest {
 
 using namespace cxxspec::matchers;
 describe(MyKlazz, $ {
+    before_all({
+        std::cout << "Display this at the beginning!\n";
+    });
+    before_each({
+        std::cout << "Display this before every example!\n";
+    });
+
     it("should be equal", _ {
         mytest::MyKlazz klazz_1(12);
         mytest::MyKlazz klazz_2(13);
@@ -76,6 +83,10 @@ describe(MyKlazz, $ {
     });
 
     explain("doSome", $ {
+        before_each({
+            std::cout << "Second!\n";
+        });
+
         it("should return input value", _ {
             mytest::MyKlazz klazz(12);
             expect(klazz.doSome()).to_eq(12);

@@ -87,6 +87,28 @@ namespace cxxspec {
 
     //--------------------------------------------------------------------------------
 
+    void Spec::run_spec_hooks(HookType type) {
+        for (auto& e : this->spec_hooks) {
+            if (e.first == type) {
+                e.second();
+            }
+        }
+    }
+
+    void Spec::run_example_hooks(HookType type, Example& ex) {
+        // when hook is for each, first run the hooks in the parent
+        if (this->parent && dynamic_cast<Spec*>(this->parent)) {
+            // TODO: this is an ugly hack, but I didn't want to extend DescribeAble with the run_hooks() method; needs to be changed
+            ((Spec*)this->parent)->run_example_hooks(type, ex);
+        }
+
+        for (auto& e : this->example_hooks) {
+            if (e.first == type) {
+                e.second(ex);
+            }
+        }
+    }
+
     void Spec::defineChilds() {
         if (this->defined) { return; }
 
@@ -99,6 +121,7 @@ namespace cxxspec {
         this->defineChilds();
 
         formatter.onEnterSpec(*this);
+        this->run_spec_hooks(HOOK_BEFORE);
 
         int subspecLimit = this->subspecs.size() - 1;
         for (int i = 0; i <= subspecLimit; i++) {
@@ -109,9 +132,12 @@ namespace cxxspec {
         int exampleLimit = this->examples.size() - 1;
         for (int i = 0; i <= exampleLimit; i++) {
             Example& ex = this->examples.at(i);
+            this->run_example_hooks(HOOK_BEFORE, ex);
             ex.run(formatter, i < exampleLimit);
+            this->run_example_hooks(HOOK_AFTER, ex);
         }
 
+        this->run_spec_hooks(HOOK_AFTER);
         formatter.onLeaveSpec(*this, hasNextSpec);
         this->runs += 1;
     }

@@ -44,6 +44,12 @@ namespace cxxspec {
     #define expect_throw(type, block)   self.expect_throw<type>(block);
     #define expect_no_throw             self.expect_no_throw
 
+    #define before_all(block)   self._add_spec_hook(cxxspec::Spec::HOOK_BEFORE, [] () { block });
+    #define after_all(block)    self._add_spec_hook(cxxspec::Spec::HOOK_AFTER , [] () { block });
+
+    #define before_each(block)  self._add_example_hook(cxxspec::Spec::HOOK_BEFORE, [] (cxxspec::Example& example) { block });
+    #define after_each(block)   self._add_example_hook(cxxspec::Spec::HOOK_AFTER , [] (cxxspec::Example& example) { block });
+
     #define $ [] (cxxspec::Spec& self) -> void
     #define _ [] (cxxspec::Example& self) -> void
 

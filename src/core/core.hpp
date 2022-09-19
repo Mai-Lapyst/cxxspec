@@ -4,6 +4,7 @@
 #include <functional>
 #include <string>
 #include <sstream>
+#include <unordered_map> // for std::pair
 
 #include "./formatter.hpp"
 #include "./util.hpp"
@@ -110,6 +111,12 @@ namespace cxxspec {
     class Spec : public DescribeAble {
     public:
         typedef std::function<void (Spec&)> Block;
+        typedef std::function<void()> SpecHookBlock;
+        typedef std::function<void (Example&)> ExampleHookBlock;
+        enum HookType {
+            HOOK_BEFORE,
+            HOOK_AFTER,
+        };
 
         Spec(std::string desc, Block block, DescribeAble* parent = nullptr)
             : _desc(desc), block(block), parent(parent)
@@ -134,6 +141,18 @@ namespace cxxspec {
         inline void _it(const char* name, const char* sourcefile, Example::Block block) {
             this->_it(std::string(name), std::string(sourcefile), block);
         }
+
+        inline void _add_spec_hook(HookType type, SpecHookBlock block) {
+            this->spec_hooks.push_back(std::make_pair(type, block));
+        }
+
+        inline void _add_example_hook(HookType type, ExampleHookBlock block) {
+            this->example_hooks.push_back(std::make_pair(type, block));
+        }
+
+        void run_spec_hooks(HookType type);
+
+        void run_example_hooks(HookType type, Example& ex);
 
         void defineChilds();
 
@@ -185,6 +204,8 @@ namespace cxxspec {
 
         std::vector<Spec> subspecs;
         std::vector<Example> examples;
+        std::vector<std::pair<HookType, SpecHookBlock>> spec_hooks;
+        std::vector<std::pair<HookType, ExampleHookBlock>> example_hooks;
 
         DescribeAble* parent;
     };
