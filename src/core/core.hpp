@@ -89,7 +89,7 @@ namespace cxxspec {
             }
             catch (...) {
                 std::stringstream ss;
-                ss << "Expected to throw a " << util::demangle(typeid(T).name()) << ", but did throw something other";
+                ss << "Expected to throw a " << util::demangle(typeid(T).name()) << ", but did throw a " << util::current_exception_typename() << " instead";
                 throw ExpectFailError(ss.str());
             }
 
