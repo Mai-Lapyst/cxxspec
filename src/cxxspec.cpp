@@ -28,6 +28,13 @@
 
 namespace cxxspec {
 
+    const char* getVersion(int* major, int* minor, int* patch) {
+        if (major != nullptr) { *major = CXXSPEC_VERSION_MAJOR; }
+        if (minor != nullptr) { *minor = CXXSPEC_VERSION_MINOR; }
+        if (patch != nullptr) { *patch = CXXSPEC_VERSION_PATCH; }
+        return CXXSPEC_VERSION;
+    }
+
     std::vector<Spec> all_specs = std::vector<Spec>();
 
     void runAllSpecs(Formatter& formatter, bool onlyMarked) {

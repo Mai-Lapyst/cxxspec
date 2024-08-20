@@ -27,6 +27,21 @@
 
 namespace cxxspec {
 
+    #define CXXSPEC_VERSION "v1.2.0"
+    #define CXXSPEC_VERSION_MAJOR 1
+    #define CXXSPEC_VERSION_MINOR 2
+    #define CXXSPEC_VERSION_PATCH 0
+
+    /**
+     * @brief Returns the version of cxxspec provided by the library
+     * 
+     * @param[out] major major
+     * @param[out] minor minor
+     * @param[out] patch patchlevel
+     * @return string representation of the version
+     */
+    const char* getVersion(int* major = nullptr, int* minor = nullptr, int* patch = nullptr);
+
     extern std::vector<Spec> all_specs;
 
     void runAllSpecs(Formatter& formatter, bool onlyMarked = false);
